@@ -1,0 +1,12 @@
++ activated when phone call is made
++ check number with database
+	- contact server with number, get tree or null
+	- if there is a tree, cancel call, start call activity
+	- if no tree, continue call.
+	
+Start Call Activity
++ map buttons to tree?
++ make call
++ display tree
++ timing?
++ send buttons pressed
