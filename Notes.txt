@@ -10,3 +10,20 @@ Start Call Activity
 + display tree
 + timing?
 + send buttons pressed
+
+
+
+TODO
+comcast reg
+add eileen
+send address to bank
+group text
+
+django auth system superuser
+username: josef
+email: josefsresearch@gmail.com
+password: temporary
+
+
+1234567890
+*#

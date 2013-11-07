@@ -37,6 +37,7 @@ public class CompanyMenu {
 		this.companyName = company;
 		this.phone = phone;
 		menu = new SparseArray<String>();
+		//initialization check, error if 2 arrays not matching
 		if (nums.length != options.length) {
 			//throw error
 			Log.e("ERROR", "Diff lengths");
@@ -45,7 +46,6 @@ public class CompanyMenu {
 			//Log.i("Adding"+String.valueOf(nums[i]),", "+options[i]);
 			menu.put(nums[i], options[i]);
 		}
-
 	}
 	
 	String getCompanyName() {
@@ -56,6 +56,7 @@ public class CompanyMenu {
 		return phone;
 	}
 	
+	//temp? or ,, or ,,,
 	String getOption(int i) {
 		if (menu.get(i) == null) {
 			return ",,,";
@@ -76,5 +77,4 @@ public class CompanyMenu {
 		}
 		return size;
 	}
-
 }

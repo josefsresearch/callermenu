@@ -1,5 +1,7 @@
 package info.josefjohn.callingmenu;
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,12 +26,18 @@ public class MyOutgoingCallHandler extends BroadcastReceiver {
 				phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
 			}
 			Log.i("PHONE NUMBER IS ", phoneNumber);
+			//wont have it when real version
+				MainActivity.numberToMenu = new HashMap<String, CompanyMenu>();
+				CompanyMenu aa = new CompanyMenu("American Airlines", "18004337300", Constants.americanAirlinesNums, Constants.americanAirlinesOptions);
+				MainActivity.numberToMenu.put("8004337300", aa);
+				MainActivity.numberToMenu.put("18004337300", aa);
+				MainActivity.numberToMenu.put("+18004337300", aa); //not necessary later on
 			//here if already in cache? do it, else check internet
 			//if not connected b4 call, our app doesn't run
 			//if (connectedToInternet()) {
 			//run get from db
 			//PRECHENE!, +1 formating? add to all? or bool split 3
-			if (MainActivity.numberToMenu.containsKey(phoneNumber)) {
+			if (phoneNumber != null && MainActivity.numberToMenu.containsKey(phoneNumber)) {
 				Log.i("we hav num", "running our app");
 				//get json tree from database, show options
 				cm = getCallerMenu(phoneNumber);
@@ -38,9 +46,8 @@ public class MyOutgoingCallHandler extends BroadcastReceiver {
 				} else {
 					// My app will bring up the call, so cancel the broadcast
 					setResultData(null);
-					MainActivity.phoneNum = phoneNumber;
+					//MainActivity.phoneNum = phoneNumber;
 					Intent i = new Intent(context, CallerActivity.class);
-					//MainActivity
 					i.putExtra("PHONE_NUMBER", phoneNumber);
 					//i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//?
 					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -52,7 +59,7 @@ public class MyOutgoingCallHandler extends BroadcastReceiver {
 				// Start my app to bring up the calls
 			} else {
 				Log.i("no num", "continue normal call");
-
+				
 			}
 			//} else {
 			//	Log.i("no internet", "continue normal call");
