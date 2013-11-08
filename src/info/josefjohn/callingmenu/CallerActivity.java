@@ -18,8 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class CallerActivity extends Activity {
-	int curOption;
-	CompanyMenu cm;
+	String curOption;
 	String[] values;
 	static String selection = "";
 	String phoneNumber;
@@ -29,11 +28,11 @@ public class CallerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_caller);
 		final ListView listView = (ListView) findViewById(R.id.listview);
-		curOption = 0;
+		curOption = "";
 		Intent intent = getIntent();
 		phoneNumber = intent.getExtras().getString("PHONE_NUMBER");
-		cm = MainActivity.numberToMenu.get(phoneNumber);
-		values = getValues(cm, curOption);
+		//cm = MainActivity.numberToMenu.get(phoneNumber);
+		values = getValues(MainActivity.cm, curOption);
 		final ArrayList<String> list = new ArrayList<String>();
 		for (int i = 0; i < values.length; ++i) {
 			list.add(values[i]);
@@ -42,7 +41,7 @@ public class CallerActivity extends Activity {
 				android.R.layout.simple_list_item_1, list);
 		listView.setAdapter(adapter);
 		//this should already give commas?
-		selection = cm.getOption(curOption);
+		selection = MainActivity.cm.getOption("~");
 		
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -50,15 +49,18 @@ public class CallerActivity extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int index,
 					long arg3) {
 				Log.i("Clicked", String.valueOf(index));
+				Log.i("means clicked", Constants.allChars[index]);
 				//map to number and click number
-				int temp = curOption*10+index+1;//?
-				Log.i("wait for"+String.valueOf(temp*10), cm.getOption(temp*10));
-				selection += String.valueOf(index+1)+cm.getOption(temp*10);
+				String temp = curOption + Constants.allChars[index];//?
+				Log.i("now temp is ", temp);
+				MainActivity.cm.getOption(temp);
+				Log.i("wait for"+temp, MainActivity.cm.getOption(temp+"~"));
+				selection += Constants.allChars[index]+MainActivity.cm.getOption(temp+"~");
 				Log.i("cur option is", String.valueOf(curOption));
-				if (cm.getNumChildren(temp) > 0) {
+				if (MainActivity.cm.getNumChildren(temp) > 0) {
 					curOption = temp;
-					Log.i(String.valueOf(curOption)+" has ", String.valueOf(cm.getNumChildren(curOption)));
-					values = getValues(cm, curOption);
+					Log.i(String.valueOf(curOption)+" has ", String.valueOf(MainActivity.cm.getNumChildren(curOption)));
+					values = getValues(MainActivity.cm, curOption);
 					list.clear();
 					for (int i = 0; i < values.length; ++i) {
 						list.add(values[i]);
@@ -79,16 +81,17 @@ public class CallerActivity extends Activity {
 		//call(num);
 	}
 
-	private String[] getValues(CompanyMenu cm, int i) {
+	private String[] getValues(CompanyMenu cMenu, String s) {
 		String[] ret;
-		int numChildren = cm.getNumChildren(i);
+		int numChildren = cMenu.getNumChildren(s);
 		if (numChildren == 0) {
 			Log.i("Got kids", "0");
 			return null;
 		}
 		ret = new String[numChildren];
+		String[] allChars = {"1","2","3","4","5","6","7","8","9","*","0","#"};
 		for (int j=0;j<numChildren;j++) {
-			ret[j] = cm.getOption(i*10 + j+1);
+			ret[j] = cMenu.getOption(s+allChars[j]);
 		}
 		return ret;
 	}
@@ -146,6 +149,7 @@ public class CallerActivity extends Activity {
 //                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //                    startActivity(i);
                     MainActivity.calling = false;
+                    MainActivity.cm = null;
                     Log.i("main calling", String.valueOf(MainActivity.calling));
                     isPhoneCalling = false;
                     /////should i finish?

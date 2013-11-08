@@ -19,22 +19,26 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 	protected static boolean calling = false;
+	protected static boolean gotMenu = false;
 	Button done;
-	protected static HashMap<String, CompanyMenu> numberToMenu;
-	private SharedPreferences sp;
+	protected static CompanyMenu cm = null;
+	protected static Context mainContext;
+	//protected static HashMap<String, CompanyMenu> numberToMenu;
+	//private SharedPreferences sp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		mainContext = this;
 		done = (Button) findViewById(R.id.done);
-		sp = getSharedPreferences("COMPANY_MENU", MODE_PRIVATE);
+		//sp = getSharedPreferences("COMPANY_MENU", MODE_PRIVATE);
 		
-		if (!sp.getBoolean("SET_UP_COMPLETE", false)) {
-			runSetUp();
-		} else {
-			Log.i("Set up", "already set up");
-		}
+		//if (!sp.getBoolean("SET_UP_COMPLETE", false)) {
+		//	runSetUp();
+		//} else {
+		//	Log.i("Set up", "already set up");
+		//}
 		Log.i("CALLER MENU", "STARTED");
 
 		done.setOnClickListener(new OnClickListener() {
@@ -47,14 +51,14 @@ public class MainActivity extends Activity {
 	}
 	
 	//wont have it when real version
-	private void runSetUp() {
-		numberToMenu = new HashMap<String, CompanyMenu>();
-		CompanyMenu aa = new CompanyMenu("American Airlines", "18004337300", Constants.americanAirlinesNums, Constants.americanAirlinesOptions);
-		numberToMenu.put("8004337300", aa);
-		numberToMenu.put("18004337300", aa);
-		numberToMenu.put("+18004337300", aa);
-		
-	}
+//	private void runSetUp() {
+//		numberToMenu = new HashMap<String, CompanyMenu>();
+//		CompanyMenu aa = new CompanyMenu("American Airlines", "18004337300", Constants.americanAirlinesNums, Constants.americanAirlinesOptions);
+//		numberToMenu.put("8004337300", aa);
+//		numberToMenu.put("18004337300", aa);
+//		numberToMenu.put("+18004337300", aa);
+//		
+//	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

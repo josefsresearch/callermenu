@@ -23,5 +23,6 @@ public class Constants {
 		",", "a","b","c",
 		",", "Delayed","General",
 		",", "a","b","c","d"};
+	protected final static String[] allChars = {"1","2","3","4","5","6","7","8","9","*","0","#"};
 	
 }
