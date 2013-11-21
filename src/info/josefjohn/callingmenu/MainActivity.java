@@ -1,6 +1,8 @@
 package info.josefjohn.callingmenu;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -11,6 +13,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -23,8 +26,21 @@ public class MainActivity extends Activity {
 	Button done;
 	protected static CompanyMenu cm = null;
 	protected static Context mainContext;
-	//protected static HashMap<String, CompanyMenu> numberToMenu;
-	//private SharedPreferences sp;
+	protected static String phoneNumber = null;
+	
+	protected static SDLogger sErrorLog;
+	protected static ReentrantLock sErrorFileLock;
+    protected static String errorFilepath;
+    protected static boolean sHasErrorsToSend;
+    protected static File sErrorFile;
+    
+    static {
+    	sErrorFileLock = new ReentrantLock();
+        sHasErrorsToSend = false;
+        sErrorFile = new File(Environment.getExternalStorageDirectory(), Constants.ERROR_FILE);
+        errorFilepath = sErrorFile.getPath();
+        sErrorLog = new SDLogger("", "CMLog.txt");
+    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,39 +48,12 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		mainContext = this;
 		done = (Button) findViewById(R.id.done);
-		//sp = getSharedPreferences("COMPANY_MENU", MODE_PRIVATE);
-		
-		//if (!sp.getBoolean("SET_UP_COMPLETE", false)) {
-		//	runSetUp();
-		//} else {
-		//	Log.i("Set up", "already set up");
-		//}
 		Log.i("CALLER MENU", "STARTED");
-
 		done.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//call("18004337300");AA
 				finish();
 			}
 		});
 	}
-	
-	//wont have it when real version
-//	private void runSetUp() {
-//		numberToMenu = new HashMap<String, CompanyMenu>();
-//		CompanyMenu aa = new CompanyMenu("American Airlines", "18004337300", Constants.americanAirlinesNums, Constants.americanAirlinesOptions);
-//		numberToMenu.put("8004337300", aa);
-//		numberToMenu.put("18004337300", aa);
-//		numberToMenu.put("+18004337300", aa);
-//		
-//	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
-	}
-
 }

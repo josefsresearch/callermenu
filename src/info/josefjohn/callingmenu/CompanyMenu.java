@@ -25,7 +25,7 @@ public class CompanyMenu {
 			Iterator<String> jsonKeys = jsonObj.keys();
 			while (jsonKeys.hasNext()) {
 				key = jsonKeys.next();
-				Log.i("in json got", key);
+				//Log.i("in json got", key);
 				menu.put(key, jsonObj.getString(key));
 			}
 		} catch (JSONException e) {
@@ -59,17 +59,17 @@ public class CompanyMenu {
 
 	//temp? or ,, or ,,,
 	String getOption(String s) {
-		Log.i("Getting string", s);
+		//Log.i("Getting string", s);
 		if (menu.get(s) == null) {
 			Log.e("not sure", "some error");
 			return "";
 		}
-		Log.i("getting", menu.get(s));
+		//Log.i("getting", menu.get(s));
 		return menu.get(s);
 	}
 
 	int getNumChildren(String s) {
-		String[] allChars = {"1","2","3","4","5","6","7","8","9","*","0","#"};
+		String[] allChars = Constants.allChars;
 		boolean done = false;
 		int i = 0;
 		while (i < allChars.length && !done) {

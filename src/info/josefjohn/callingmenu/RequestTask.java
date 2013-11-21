@@ -41,23 +41,18 @@ public class RequestTask extends AsyncTask<String, String, String>{
 	
 	@Override
 	protected String doInBackground(String... arg0) {
-		// TODO Auto-generated method stub
-
 		try {
-			URL url = new URL("http://copymysite.heroku.com/menus/menu/123/");//.js
+			if (MainActivity.phoneNumber == null) {
+				Log.e("ERROR request task", "got null phone number");
+			}
+			URL url = new URL("http://copymysite.heroku.com/menus/menu/"+MainActivity.phoneNumber+"/");
 			HttpURLConnection con = (HttpURLConnection) url
 					.openConnection();
 			MainActivity.cm = readStream(con.getInputStream());
 			MainActivity.gotMenu = true;
-			//			  String s = con.getInputStream().toString();
-			//			  JSONObject json = new JSONObject(s);
-			//			  
-			//			  Log.i("got", json.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		
 		return null;
 	}
 
@@ -93,22 +88,4 @@ public class RequestTask extends AsyncTask<String, String, String>{
 	
 		return new CompanyMenu(json);
 	} 
-
-
-	//	URL url = null;
-	//	InputStream in = null;
-	//	try {
-	//		url = new URL("http://copymysite.heroku.com/menus/menu/" +123+ "/.js");
-	//	} catch (MalformedURLException e) {
-	//		// TODO Auto-generated catch block
-	//		e.printStackTrace();
-	//	}
-	//
-	//	try {
-	//		in = url.openStream();
-	//	} catch (IOException e) {
-	//		// TODO Auto-generated catch block
-	//		e.printStackTrace();
-	//	}
-	//	String s = in.toString();
 }

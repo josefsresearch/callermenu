@@ -2,8 +2,6 @@ package info.josefjohn.callingmenu;
 
 import java.util.ArrayList;
 
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -20,9 +18,11 @@ import android.widget.ListView;
 public class CallerActivity extends Activity {
 	String curOption;
 	String[] values;
-	static String selection = "";
+	String selection = "";
 	String phoneNumber;
-	
+	String prevCur = "";
+	String prevSelection = "";
+
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,65 +31,105 @@ public class CallerActivity extends Activity {
 		curOption = "";
 		Intent intent = getIntent();
 		phoneNumber = intent.getExtras().getString("PHONE_NUMBER");
-		//cm = MainActivity.numberToMenu.get(phoneNumber);
 		values = getValues(MainActivity.cm, curOption);
+		if (values == null) {
+			String error = "CA1 ERROR - getValues with "+phoneNumber+", and "+curOption+"got null";
+			HelperMethods.saveError(error);
+			call(phoneNumber);
+		}
 		final ArrayList<String> list = new ArrayList<String>();
 		for (int i = 0; i < values.length; ++i) {
 			list.add(values[i]);
 		}
+		list.add("None");
 		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
 				android.R.layout.simple_list_item_1, list);
 		listView.setAdapter(adapter);
-		//this should already give commas?
 		selection = MainActivity.cm.getOption("~");
-		
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int index,
 					long arg3) {
-				Log.i("Clicked", String.valueOf(index));
-				Log.i("means clicked", Constants.allChars[index]);
-				//map to number and click number
-				String temp = curOption + Constants.allChars[index];//?
-				Log.i("now temp is ", temp);
-				MainActivity.cm.getOption(temp);
-				Log.i("wait for"+temp, MainActivity.cm.getOption(temp+"~"));
-				selection += Constants.allChars[index]+MainActivity.cm.getOption(temp+"~");
-				Log.i("cur option is", String.valueOf(curOption));
-				if (MainActivity.cm.getNumChildren(temp) > 0) {
-					curOption = temp;
-					Log.i(String.valueOf(curOption)+" has ", String.valueOf(MainActivity.cm.getNumChildren(curOption)));
-					values = getValues(MainActivity.cm, curOption);
+				if (index == values.length) {
+					if (list.get(index) == "None") {
+						call(phoneNumber);
+					} else {
+						Log.i("Back pressed", "Going back");
+						//String commaless = curOption.replaceAll(",", "");
+						//if (commaless.length() <= 1) {
+						if (curOption.length() <= 1) {
+							curOption = "";
+							selection = MainActivity.cm.getOption("~");
+							updateList(curOption, false);
+						} else {
+							selection = prevSelection;
+							curOption = prevCur;
+							if (prevCur.length() > 1) {
+								prevCur = curOption.substring(0, prevCur.length()-1);
+								prevSelection = MainActivity.cm.getOption("~");
+								String cur = "";
+								for (int i=1;i<prevCur.length();i++) {
+									cur = prevCur.substring(0, i);
+									prevSelection += MainActivity.cm.getOption(cur);
+									if (MainActivity.cm.getOption(cur+"~") != null) {
+										prevSelection += MainActivity.cm.getOption(cur+"~");
+									}
+								}
+							} else {
+								prevCur = "";
+								prevSelection = MainActivity.cm.getOption("~");
+							}
+							updateList(curOption, true);
+						}
+					}
+				} else {
+					prevSelection = selection;
+					prevCur = curOption;
+					String temp = curOption + Constants.allChars[index];
+					MainActivity.cm.getOption(temp);
+					selection += Constants.allChars[index]+MainActivity.cm.getOption(temp+"~");
+					Log.i("cur option is", String.valueOf(curOption));
+					if (MainActivity.cm.getNumChildren(temp) > 0) {
+						curOption = temp;
+						updateList(curOption, true);
+					} else {
+						Log.i("SELECTION is", selection);
+						call(phoneNumber+","+selection);
+					}
+				}
+			}
+
+			private void updateList(String curOption, boolean needBack) {
+				values = getValues(MainActivity.cm, curOption);
+				if (values == null) {
+					String error = "CA2 ERROR - getValues with "+phoneNumber+", and "+curOption+"got null";
+					HelperMethods.saveError(error);
+					call(phoneNumber);
+				} else {
 					list.clear();
 					for (int i = 0; i < values.length; ++i) {
 						list.add(values[i]);
 					}
+					if (needBack) {
+						list.add("Back");
+					} else {
+						list.add("None");
+					}
 					adapter.notifyDataSetChanged();
-					Log.i("SELECTION is", selection);
-				} else {
-					Log.i("SELECTION is", selection);
-					MainActivity.calling = true;//do i need to false onPause?
-					call(phoneNumber+selection);
-					//Log.i("calling", "finish");
-					//MainActivity.calling = false;
-					//finish();
 				}
 			}
 		});
-		//Log.i("NUM GOT IS ", num);
-		//call(num);
 	}
 
 	private String[] getValues(CompanyMenu cMenu, String s) {
 		String[] ret;
 		int numChildren = cMenu.getNumChildren(s);
 		if (numChildren == 0) {
-			Log.i("Got kids", "0");
 			return null;
 		}
 		ret = new String[numChildren];
-		String[] allChars = {"1","2","3","4","5","6","7","8","9","*","0","#"};
+		String[] allChars = Constants.allChars;
 		for (int j=0;j<numChildren;j++) {
 			ret[j] = cMenu.getOption(s+allChars[j]);
 		}
@@ -97,85 +137,51 @@ public class CallerActivity extends Activity {
 	}
 
 	private void call(String number) {
+		MainActivity.calling = true;//do i need to false onPause?
 		Log.i("CALLER_ACTIVITY", "CALLING "+number);
-		//**
 		PhoneCallListener phoneListener = new PhoneCallListener();
-        TelephonyManager telephonyManager = (TelephonyManager) this
-                .getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.listen(phoneListener,
-                PhoneStateListener.LISTEN_CALL_STATE);
-		//**
+		TelephonyManager telephonyManager = (TelephonyManager) this
+				.getSystemService(Context.TELEPHONY_SERVICE);
+		telephonyManager.listen(phoneListener,
+				PhoneStateListener.LISTEN_CALL_STATE);
 		Intent callIntent = new Intent(Intent.ACTION_CALL);
 		callIntent.setData(Uri.parse("tel:"+number));
 		startActivity(callIntent);
-		//when done, MainActivity.calling = false;
 	}
-	
-	//**
+
 	private class PhoneCallListener extends PhoneStateListener {
+		private boolean isPhoneCalling = false;
+		String LOG_TAG = "CALL_LISTENER";
 
-        private boolean isPhoneCalling = false;
+		@Override
+		public void onCallStateChanged(int state, String incomingNumber) {
+			if (TelephonyManager.CALL_STATE_RINGING == state) {
+				Log.i(LOG_TAG, "RINGING, number: " + incomingNumber);
+			}
 
-        String LOG_TAG = "LOGGING 123";
+			if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
+				Log.i(LOG_TAG, "OFFHOOK");
+				isPhoneCalling = true;
+			}
 
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-
-            if (TelephonyManager.CALL_STATE_RINGING == state) {
-                // phone ringing
-                Log.i(LOG_TAG, "RINGING, number: " + incomingNumber);
-            }
-
-            if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
-                // active
-                Log.i(LOG_TAG, "OFFHOOK");
-
-                isPhoneCalling = true;
-            }
-
-            if (TelephonyManager.CALL_STATE_IDLE == state) {
-                // run when class initial and phone call ended, need detect flag
-                // from CALL_STATE_OFFHOOK
-                Log.i(LOG_TAG, "IDLE");
-
-                if (isPhoneCalling) {
-
-                    Log.i(LOG_TAG, "restart app");
-
-                    //** restart app
-//                    Intent i = getBaseContext().getPackageManager()
-//                            .getLaunchIntentForPackage(
-//                                    getBaseContext().getPackageName());
-//                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                    startActivity(i);
-                    MainActivity.calling = false;
-                    MainActivity.cm = null;
-                    Log.i("main calling", String.valueOf(MainActivity.calling));
-                    isPhoneCalling = false;
-                    /////should i finish?
-                }
-
-            }
-        }
+			if (TelephonyManager.CALL_STATE_IDLE == state) {
+				// run when class initial and phone call ended, need detect flag
+				// from CALL_STATE_OFFHOOK
+				Log.i(LOG_TAG, "IDLE");
+				if (isPhoneCalling) {
+					MainActivity.calling = false;
+					MainActivity.cm = null;
+					MainActivity.phoneNumber = null;
+					isPhoneCalling = false;
+					/////should i finish?
+				}
+			}
+		}
 	}
-	//**
-	
-//	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-//        Log.i("REQUEST CODE IS", String.valueOf(requestCode));
-//        if (resultCode == RESULT_CANCELED){
-//        	Log.e("in onActivityResult", "some problem");
-//        } else if (requestCode == 1) {
-//        	MainActivity.calling = false;
-//        	Log.i("MAIN ACTIVITY CALLING IS ", String.valueOf(MainActivity.calling));
-//        	finish();
-//        } else {
-//        	Log.e("unknown errorCode",String.valueOf(requestCode));
-//        }
-//	}
-	
-	//?
+
 	protected void onPause() {
 		super.onPause();
-		finish();
+		Log.i("In Caller Activity", "onPause finishing");
+		finish();//?
 	}
 }

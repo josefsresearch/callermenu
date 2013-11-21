@@ -1,6 +1,6 @@
 package info.josefjohn.callingmenu;
 
-import org.json.JSONObject;
+import java.util.HashSet;
 
 public class Constants {
 	protected static int[] americanAirlinesNums = {0,1,2,3,4,5,
@@ -24,5 +24,9 @@ public class Constants {
 		",", "Delayed","General",
 		",", "a","b","c","d"};
 	protected final static String[] allChars = {"1","2","3","4","5","6","7","8","9","*","0","#"};
+	public static final String ERROR_FILE = "CMErrors";
+	public static final String POST_ERRORS_URI = "http://a.com/";//TODO
+	public static final String SUCCESS = "SUCCESS";
+	protected final static String[] allCurNumbers = {"123", "18004359792", "18006926980", "18004284322", "18005382583", "18004337300"};
 	
 }
