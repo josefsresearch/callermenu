@@ -1,7 +1,18 @@
+/*
+ * Copyright (C) February 2014
+ * Project for Tal Lavian, tlavian@gmail.com
+ * @author Josef John, josefjohn88@gmail.com
+ */
+
 package info.josefjohn.callingmenu;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,9 +25,11 @@ public class CompanyMenu {
 	String phone;
 	String key;
 	HashMap<String, String> menu;
+	List<String> responses;
 
 	CompanyMenu(JSONObject jsonObj) {
 		menu = new HashMap<String, String>();
+		responses = new ArrayList<String>();
 		try {
 			companyName = jsonObj.getString("name");
 			phone = jsonObj.getString("number");
@@ -26,10 +39,13 @@ public class CompanyMenu {
 			while (jsonKeys.hasNext()) {
 				key = jsonKeys.next();
 				//Log.i("in json got", key);
+				if (key.endsWith("?")) {
+					responses.add(key);
+				}
 				menu.put(key, jsonObj.getString(key));
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+			// TODO Auto-generated catch block 
 			e.printStackTrace();
 		}
 	}
@@ -56,6 +72,46 @@ public class CompanyMenu {
 	String getPhoneNum() {
 		return phone;
 	}
+	
+	List<String> getResponses() {
+		return responses;
+	}
+
+	int getCount() {
+		int i=0;
+		for (String s:menu.keySet()) {
+			if (s.contains("~")) {
+				//dont add
+			} else {
+				i++;
+			}
+		}
+		return i;
+	}
+
+	String[] getAllOptions() {
+		Stack<String> stack = new Stack<String>();
+		List<String> list = new ArrayList<String>();
+		for (String s:Constants.allCharsReversed) {
+			if (menu.containsKey(s)) {
+				stack.add(s);
+			}
+		}
+		while (stack.peek() != null) {
+			String cur = stack.pop();
+			list.add(menu.get(cur));
+			for (String s:Constants.allCharsReversed) {
+				if (menu.containsKey(cur+s)) {
+					stack.add(cur+s);
+				}
+			}
+		}
+		String[] ret = new String[list.size()];
+		for (int i=0;i<list.size();i++) {
+			ret[i] = list.get(i);
+		}
+		return ret;
+	}
 
 	//temp? or ,, or ,,,
 	String getOption(String s) {
@@ -80,5 +136,13 @@ public class CompanyMenu {
 			}
 		}
 		return i;
+	}
+
+	public boolean has(String string) {
+		if (menu.get(string) == null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

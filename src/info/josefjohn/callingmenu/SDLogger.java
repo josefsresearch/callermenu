@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 UC Berkeley
+ * Copyright (C) February 2014
  * @author Josef John, josefjohn88@gmail.com
  */
 

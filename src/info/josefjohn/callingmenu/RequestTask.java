@@ -1,3 +1,9 @@
+/*
+ * Copyright (C) February 2014
+ * Project for Tal Lavian, tlavian@gmail.com
+ * @author Josef John, josefjohn88@gmail.com
+ */
+
 package info.josefjohn.callingmenu;
 
 import java.io.BufferedReader;
@@ -19,33 +25,18 @@ import android.util.Log;
 public class RequestTask extends AsyncTask<String, String, String>{
 	private ProgressDialog loadingDialog;
 	private Context context;
-	
-	public RequestTask() {
-		//this.context = context;
-		//loadingDialog = new ProgressDialog(context);
-	}
-	
-	@Override
-    protected void onPostExecute(String result) {   
-		//loadingDialog.cancel();
-    }
 
-    @Override
-    protected void onPreExecute() {
-    	super.onPreExecute();
-    	//loadingDialog.setTitle("Please wait");
-        //loadingDialog.show();
-    }
-
-
-	
+	/*
+	 * Makes the request to get the caller menu and reads the response
+	 * If receives valid response, converts to json and sets gotMenu to true
+	 */
 	@Override
 	protected String doInBackground(String... arg0) {
 		try {
 			if (MainActivity.phoneNumber == null) {
 				Log.e("ERROR request task", "got null phone number");
 			}
-			URL url = new URL("http://copymysite.heroku.com/menus/menu/"+MainActivity.phoneNumber+"/");
+			URL url = new URL(PrivateConstants.REQUEST_NUMBER+MainActivity.phoneNumber+"/");
 			HttpURLConnection con = (HttpURLConnection) url
 					.openConnection();
 			MainActivity.cm = readStream(con.getInputStream());
@@ -81,11 +72,9 @@ public class RequestTask extends AsyncTask<String, String, String>{
 		try {
 			json = new JSONObject(response.toString());
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			Log.e("json is", "null");
 		}
-	
 		return new CompanyMenu(json);
 	} 
 }

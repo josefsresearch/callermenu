@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) February 2014
+ * @author Josef John, josefjohn88@gmail.com
+ */
+
 package info.josefjohn.callingmenu;
 
 import java.io.File;
@@ -31,8 +36,7 @@ public class ErrorPoster  extends AsyncTask<Object, Integer, String> {
     
     static void post() {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(Constants.POST_ERRORS_URI);
-            //MultipartEntity multipartEntity = new MultipartEntity();
+            HttpPost httpPost = new HttpPost(PrivateConstants.POST_ERRORS_URI);
             BasicHttpResponse httpResponse = null;
             MainActivity.sErrorFileLock.lock();
             try {
@@ -43,15 +47,9 @@ public class ErrorPoster  extends AsyncTask<Object, Integer, String> {
             }
             try {
                     File fi = new File(MainActivity.errorFilepath);
-                    //multipartEntity.addPart("name", new StringBody("test.txt"));
-                    //multipartEntity.addPart("type", new StringBody("text"));
-                    //multipartEntity.addPart("error", new FileBody(fi));
-                    HttpEntity multipartEntity = null; //get rid of this
+                    HttpEntity multipartEntity = null; 
                     httpPost.setEntity(multipartEntity);
                     Log.i("in posterror", "executing httpPost");
-            //} catch (UnsupportedEncodingException e1) {
-              //      e1.printStackTrace();
-                //    MainActivity.sErrorLog.println("PE1 EXCEPTION @"+new Date().toString()+":"+e1.getClass()+","+e1.getMessage());
             } catch (Exception e) {
                     e.printStackTrace();
                     MainActivity.sErrorLog.println("PE1.1 EXCEPTION @"+new Date().toString()+":"+e.getClass()+","+e.getMessage());
@@ -79,11 +77,9 @@ public class ErrorPoster  extends AsyncTask<Object, Integer, String> {
                     totalResponse = HelperMethods.readInputStream(httpResponse.getEntity().getContent());
                     Log.i("postError results", totalResponse.toString());
             } catch (IllegalStateException e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                     MainActivity.sErrorLog.println("PE3 EXCEPTION @"+new Date().toString()+":"+e1.getClass()+","+e1.getMessage());
             } catch (IOException e2) {
-                    // TODO Auto-generated catch block
                     e2.printStackTrace();
                     MainActivity.sErrorLog.println("PE3.1 EXCEPTION @"+new Date().toString()+":"+e2.getClass()+","+e2.getMessage());
             } catch (Exception e) {
@@ -92,7 +88,6 @@ public class ErrorPoster  extends AsyncTask<Object, Integer, String> {
             }
             MainActivity.sErrorFileLock.lock();
             try {
-                    //TODO ? only if success post
                     new File(MainActivity.errorFilepath).delete();
                     MainActivity.sHasErrorsToSend = false;
             } catch (Exception e) {

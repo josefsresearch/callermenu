@@ -1,6 +1,13 @@
+/*
+ * Copyright (C) February 2014
+ * Project for Tal Lavian, tlavian@gmail.com
+ * @author Josef John, josefjohn88@gmail.com
+ */
+
 package info.josefjohn.callingmenu;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,12 +29,16 @@ public class CallerActivity extends Activity {
 	String phoneNumber;
 	String prevCur = "";
 	String prevSelection = "";
-
+	HashMap<String, String> responses;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_caller);
 		final ListView listView = (ListView) findViewById(R.id.listview);
+		responses = new HashMap<String, String>();
+		for (String resp:MainActivity.cm.getResponses()) {
+			responses.put(resp, "");
+		}
 		curOption = "";
 		Intent intent = getIntent();
 		phoneNumber = intent.getExtras().getString("PHONE_NUMBER");
@@ -43,7 +54,7 @@ public class CallerActivity extends Activity {
 		}
 		list.add("None");
 		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
-				android.R.layout.simple_list_item_1, list);
+				R.layout.list_row, R.id.textView1, list);
 		listView.setAdapter(adapter);
 		selection = MainActivity.cm.getOption("~");
 
@@ -56,8 +67,6 @@ public class CallerActivity extends Activity {
 						call(phoneNumber);
 					} else {
 						Log.i("Back pressed", "Going back");
-						//String commaless = curOption.replaceAll(",", "");
-						//if (commaless.length() <= 1) {
 						if (curOption.length() <= 1) {
 							curOption = "";
 							selection = MainActivity.cm.getOption("~");
@@ -84,9 +93,22 @@ public class CallerActivity extends Activity {
 						}
 					}
 				} else {
+					String temp = curOption + Constants.allChars[index];
+					//if there is a website to visit
+					if (MainActivity.cm.has(temp+"_")) {
+						//pop up confirmation, visit website
+						//TODO
+						Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.cm.getOption(temp+"_")));
+						startActivity(myIntent);
+					} else {
+						//if there is a response to give
+						if (MainActivity.cm.has(temp+"?")) {
+							//pop up get response, update responses
+							//TODO pop up with hashmap value, if ok add hashmapvalue else ?
+							
+						}
 					prevSelection = selection;
 					prevCur = curOption;
-					String temp = curOption + Constants.allChars[index];
 					MainActivity.cm.getOption(temp);
 					selection += Constants.allChars[index]+MainActivity.cm.getOption(temp+"~");
 					Log.i("cur option is", String.valueOf(curOption));
@@ -96,6 +118,7 @@ public class CallerActivity extends Activity {
 					} else {
 						Log.i("SELECTION is", selection);
 						call(phoneNumber+","+selection);
+					}
 					}
 				}
 			}
@@ -122,6 +145,7 @@ public class CallerActivity extends Activity {
 		});
 	}
 
+	//returns one level of the menu
 	private String[] getValues(CompanyMenu cMenu, String s) {
 		String[] ret;
 		int numChildren = cMenu.getNumChildren(s);
@@ -137,7 +161,7 @@ public class CallerActivity extends Activity {
 	}
 
 	private void call(String number) {
-		MainActivity.calling = true;//do i need to false onPause?
+		MainActivity.calling = true;//do i need false in onPause?
 		Log.i("CALLER_ACTIVITY", "CALLING "+number);
 		PhoneCallListener phoneListener = new PhoneCallListener();
 		TelephonyManager telephonyManager = (TelephonyManager) this
@@ -182,6 +206,6 @@ public class CallerActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 		Log.i("In Caller Activity", "onPause finishing");
-		finish();//?
+		finish();//do i need this?
 	}
 }
